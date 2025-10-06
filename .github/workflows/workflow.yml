@@ -35,6 +35,8 @@ jobs:
 #       Note: since I explicitly include the dashboard JSON in the repo, the build step is not strictly necessary.
 #       However, since I don't have CI which checks that the JSON output matches the source in
 #       `resources/dashboard.json`, building in CD is necessary.
+      - name: Check grafanctl config
+        run: grafanactl config check
       - name: Build with Gradle
         run: gradle jar
       - name: Generate dashboard JSON
