@@ -39,7 +39,7 @@ jobs:
         run: |
           grafanactl config set contexts.default.grafana.server ${{ vars.GRAFANA_SERVER }}
           grafanactl config set contexts.default.grafana.org-id ${{ vars.GRAFANA_ORG_ID }}
-          grafanactl config set contexts.default.grafana.token ${{ vars.GRAFANA_TOKEN }}
+          grafanactl config set contexts.default.grafana.token ${{ secrets.GRAFANA_TOKEN }}
       - name: Check grafanctl config
         run: grafanactl config check
       - name: Build with Gradle
