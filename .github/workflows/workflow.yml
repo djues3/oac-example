@@ -36,7 +36,7 @@ jobs:
 #       However, since I don't have CI which checks that the JSON output matches the source in
 #       `resources/dashboard.json`, building in CD is necessary.
       - name: Build with Gradle
-        run: ./gradlew jar
+        run: gradle jar
       - name: Generate dashboard JSON
         run: java -jar dashboard-generator/build/libs/dashboard-generator.jar > resources/dashboard.json
       - name: Deploy Dashboard with grafanactl
@@ -45,10 +45,10 @@ jobs:
           GRAFANA_STACK_ID: ${{ vars.GRAFANA_STACK_ID }}
           GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
         run: |
-          if [ -f resources/dashboard.json ]; then
-            echo "resources/dashboard.json exists, deploying dashboard."
+          #if [ -f resources/dashboard.json ]; then
+          #  echo "resources/dashboard.json exists, deploying dashboard."
             grafanactl resources push dashboards --path ./resources/dashboard.json
-          else
-            echo "sample-dashboard.json does not exist."
-            exit 1
-          fi
+          #else
+          #  echo "sample-dashboard.json does not exist."
+          #  exit 1
+          #fi
