@@ -44,7 +44,7 @@ services:
     ports:
       - "9093:9093"
   grafana:
-    image: grafana/grafana:${GRAFANA_VERSION:-11.6.0}
+    image: grafana/grafana:${GRAFANA_VERSION:-12.3.0-18266415852}
     container_name: grafana
     environment:
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin

@@ -1,4 +1,3 @@
-
 plugins {
     application
 }
@@ -17,6 +16,12 @@ java {
     }
 }
 
+tasks.named<Jar>("jar") {
+    manifest {
+        attributes["Main-Class"] = "com.example.DashboardGenerator"
+        attributes["Class-Path"] = configurations.runtimeClasspath.get().joinToString(" ")
+    }
+}
 
 application {
     mainClass = "com.example.DashboardGenerator"

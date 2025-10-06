@@ -69,8 +69,9 @@ function performFailover() {
 
   if (passives.length > 0) {
     const newActive = passives[0];
+    const prev = activePrimary;
     activePrimary = newActive.name;
-    console.log(`DB failover: ${activePrimary} → passive, ${newActive.name} → active`);
+    console.log(`DB failover: ${prev} -> passive, ${newActive.name} -> active`);
   }
 }
 
