@@ -1,0 +1,597 @@
+{
+  "uid": "cpu-usage-dashboard",
+  "title": "Node CPU usage gen",
+  "tags": [
+    "generated",
+    "foundation-sdk"
+  ],
+  "timezone": "browser",
+  "editable": true,
+  "graphTooltip": 0,
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "fiscalYearStartMonth": 0,
+  "refresh": "10s",
+  "schemaVersion": 41,
+  "panels": [
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Overview",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "topk(3, cpu_usage)",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Highest load",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false,
+          "asTable": false,
+          "isVisible": false,
+          "sortBy": "",
+          "sortDesc": false,
+          "width": 0.0,
+          "calcs": []
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "showPoints": "never"
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "count(cpu_usage) by (role)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{role}}",
+          "refId": ""
+        }
+      ],
+      "title": "Running instances",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 1
+      },
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value_and_name",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": []
+        },
+        "percentChangeColorMode": "standard",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "cpu_usage{role=\"database\"}\n  and on(instance)\ndb_is_active{role=\"database\"} == 1\n",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Active DB usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 10
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0.0,
+          "max": 100.0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(cpu_usage) by (role)",
+          "legendFormat": "{{role}}",
+          "refId": ""
+        }
+      ],
+      "title": "Average CPU usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 10
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "stddev(cpu_usage) by (role)",
+          "legendFormat": "{{role}}",
+          "refId": ""
+        }
+      ],
+      "title": "Stddev CPU usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 19
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Database",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "bargauge",
+      "targets": [
+        {
+          "expr": "cpu_usage{role=\"database\"}",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Database CPU usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0.0,
+          "max": 100.0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "db_is_active",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Active DB",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 20
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "gradientMode": "opacity",
+            "lineInterpolation": "stepAfter",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "fillOpacity": 75.0,
+            "showPoints": "never",
+            "axisGridShow": false,
+            "scaleDistribution": {
+              "type": "symlog"
+            }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "changes(db_is_active[15s])",
+          "format": "time_series",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Failover count",
+      "description": "Number of database failovers in the last 15 seconds",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 29
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(cpu_usage{role=\"database\"} and on(instance) db_is_active == 1)\n  /\navg(cpu_usage{role=\"database\"} and on(instance) db_is_active == 0)\n",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Active CPU Usage / Passive CPU Usage",
+      "description": "How much more CPU does the active database use compared to the passive ones?",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 29
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Trends and Predictions",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "deriv(cpu_usage[15]) * 15",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "CPU usage change",
+      "description": "How uniform is our uniform-ish distribution?",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Alerts & Thresholds",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "count(cpu_usage > 80)",
+          "instant": true,
+          "range": false,
+          "refId": ""
+        }
+      ],
+      "title": "Servers > 80%",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "background",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": []
+        },
+        "percentChangeColorMode": "standard",
+        "orientation": "auto"
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "cpu_usage > 80",
+          "legendFormat": "{{instance}} ({{role}})",
+          "refId": ""
+        }
+      ],
+      "title": "Overloaded servers (>80%)",
+      "description": "Servers currently above 80% CPU usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "count(cpu_usage > 90)",
+          "instant": true,
+          "range": false,
+          "refId": ""
+        }
+      ],
+      "title": "Servers > 90% (Critical)",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 49
+      },
+      "options": {
+        "graphMode": "none",
+        "colorMode": "background",
+        "justifyMode": "auto",
+        "textMode": "auto",
+        "wideLayout": true,
+        "showPercentChange": false,
+        "reduceOptions": {
+          "calcs": []
+        },
+        "percentChangeColorMode": "standard",
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Role Comparison",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 49
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "avg(cpu_usage{role=\"frontend\"}) / avg(cpu_usage{role=\"backend\"})",
+          "legendFormat": "Frontend/Backend ratio",
+          "refId": ""
+        }
+      ],
+      "title": "Frontend vs Backend",
+      "description": "Relative CPU usage comparison",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      }
+    },
+    {
+      "type": "bargauge",
+      "targets": [
+        {
+          "expr": "topk(2, cpu_usage) by (role)",
+          "instant": true,
+          "range": false,
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Top 2 per role",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "options": {
+        "displayMode": "basic",
+        "valueMode": "color",
+        "namePlacement": "auto",
+        "showUnfilled": true,
+        "sizing": "auto",
+        "minVizWidth": 8,
+        "minVizHeight": 16,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false,
+          "calcs": []
+        },
+        "reduceOptions": {
+          "calcs": []
+        },
+        "maxVizHeight": 300,
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "(sum(cpu_usage) by (role) / (count(cpu_usage) by (role) * 100)) * 100",
+          "legendFormat": "{{role}}",
+          "refId": ""
+        }
+      ],
+      "title": "Role utilization %",
+      "description": "Average CPU usage as percentage of capacity per role",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 59
+      },
+      "fieldConfig": {
+        "defaults": {
+          "min": 0.0,
+          "max": 100.0
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "row",
+      "collapsed": false,
+      "title": "Detailed Views",
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 59
+      },
+      "id": 0,
+      "panels": []
+    },
+    {
+      "type": "table",
+      "targets": [
+        {
+          "expr": "cpu_usage",
+          "instant": true,
+          "range": false,
+          "format": "table",
+          "refId": ""
+        }
+      ],
+      "title": "All servers",
+      "description": "Complete server inventory with current CPU usage",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 60
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "max_over_time(cpu_usage[1h])",
+          "legendFormat": "{{instance}}",
+          "refId": ""
+        }
+      ],
+      "title": "Peak CPU (last hour)",
+      "description": "Maximum CPU usage recorded in the past hour",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 60
+      }
+    },
+    {
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "(cpu_usage - cpu_usage offset 1m) > 20",
+          "legendFormat": "{{instance}} spike",
+          "refId": ""
+        }
+      ],
+      "title": "CPU spike detection",
+      "description": "Shows sudden increases >20% in 1 minute",
+      "transparent": true,
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 69
+      }
+    }
+  ],
+  "templating": {},
+  "annotations": {}
+}

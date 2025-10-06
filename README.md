@@ -1,15 +1,25 @@
-# Demo Alerting in Prometheus and Grafana 
+# Observability-as-code demo
 
-Grafana Alerting is built on the Prometheus Alerting model. This demo project showcases the similarities between Prometheus and Grafana alerting systems, covering topics such as:
+This repository contains a testing setup for Grafana and an example of how to create a dashboard using the [Grafana Foundation SDK](https://github.com/grafana/grafana-foundation-sdk).
 
-- Creating alerts in Prometheus
-- Recreating the same alerts using Grafana
-- Setting up alerts based on Loki logs
-- Exploring alerting components like evaluation groups and notification policies
-- Creating template notifications
-- And more!
+See the instructions below for instructions on how to run the demo environment and generate test data.
 
-This project pairs well with this [Alerting Presentation Template](https://docs.google.com/presentation/d/1XvJnBlNnXUjiS409ABN4NxNkFZoYDmoRKKoJqsvln-g/edit?usp=sharing). Together, they provide an excellent starting point for presenting the Prometheus Alerting model and demonstrating its use in Grafana.
+The test data is simulating a web app. 
+The simulated web app has:
+- Replicated database (one active and two passive)
+- Backend servers (three instances)
+- Frontend servers (three instances)
+
+The demo includes a `cpu_usage` metric and a `db_is_active` metric.
+(Note: The `db_is_active` metric could be extrapolated from the data due to the active DB always having the highest CPU usage, but it's included for simplicity.)
+
+## Project structure
+
+The project consists of two main components:
+- *Test data generator*: (`testdata/1-cpu-usage.js`) A k6 script that generates CPU usage metrics for the simulated web app and sends them to Prometheus.
+- *Dashboard generator*: (`dashboard-generator`) A Java (Gradle) project that uses the Grafana Foundation SDK to create a Grafana dashboard with panels based on the generated test data.
+
+(Below is copied, and slightly changed, from the [Grafana demo prometheus and grafana alerts](https://github.com/grafana/demo-prometheus-and-grafana-alerts) repository)
 
 ## Run the demo environment
 
@@ -18,7 +28,7 @@ This repository includes a [Docker Compose setup](./docker-compose.yaml) that ru
 To run the demo environment:
 
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 You can then access:
@@ -28,9 +38,10 @@ You can then access:
 
 ### Generating test data
 
-This demo uses [Grafana k6](https://grafana.com/docs/k6) to generate test data for Prometheus and Loki.
+This demo uses [Grafana k6](https://grafana.com/docs/k6) to generate test data for Prometheus.
 
 To run k6 tests and store logs in Loki and time series data in Prometheus, you'll need a k6 version with the `xk6-client-prometheus-remote` and `xk6-loki` extensions.
+(I don't think `xk6-loki` is strictly necessary, but I didn't test without it.)
 
 You can build the k6 version using the [`xk6` instructions](https://grafana.com/docs/k6/latest/extensions/build-k6-binary-using-go/) or Docker as follows:
 
@@ -72,34 +83,38 @@ docker run --rm -it -e GOOS=windows -u "$(id -u):$(id -g)" -v "${PWD}:/xk6" `
 Once you've built the necessary k6 version, you can pre-populate data by running the [scripts from the `testdata` folder](./testdata/) as follows:
 
 ```bash
-./k6 run testdata/<FILE>.js
+./k6 run testdata/1-cpu-usage.js
 ```
 
-The `testdata` scripts inject Prometheus metric and Loki log data, which can be used to define alert queries and conditions. You can then modify and run the scripts to test the alerts.
+The `testdata` scripts inject Prometheus metric, which can be used to define alert queries and conditions. You can then modify and run the scripts to test the alerts.
 
+## Building the dashboard
+The dashboard generator requires:
+- Java 25+
+- Gradle
 
-### Receive webhook notifications
+To generate the dashboard JSON run:
+```bash
+./gradlew :dashboard-generator:jar
+java -jar dashboard-generator/build/libs/dashboard-generator.jar > resources/dashboard.json
+```
+This outputs the dashboard in a Kubernetes-manifest like format to `resources/dashboard.json`.
+To get the raw JSON file, you can run something like:
+```bash
+java -jar dashboard-generator/build/libs/dashboard-generator.jar | jq '.spec' > resources/dashboard-raw.json
+```
 
-One of the simplest ways to receive alert notifications is by using a Webhook.  You can use [`webhook.site`](https://webhook.site/) to create Webhook URLs and view the incoming messages.
+To upload the generated dashboard to Grafana you need to do:
+```bash
+grafanactl resources push dashboards -p ./resources/dashboard.json
+```
 
-- For Prometheus alertmanager: 
-  
-  Set the Webhook URL to the [alertmanager.yml](./alertmanager/alertmanager.yml) configuration file.
+Or all in one:
+```bash
+./gradlew :dashboard-generator:jar && java -jar dashboard-generator/build/libs/dashboard-generator.jar > resources/dashboard.json && grafanactl resources push dashboards -p ./resources/dashboard.json
+```
 
-- For Grafana:
-  
-  Create a Webhook contact point and assign it to the notification policy.
-
-### Receive mail notifications
-
-You can also configure notifications to be sent via your Gmail account using an [App Password](https://support.google.com/accounts/answer/185833?hl=en). After creating your App password:
-
-- For Prometheus Alertmanager:
-
-  Replace `your_mail@gmail` with your Gmail address in the [alertmanager.yml](./alertmanager/alertmanager.yml) configuration file.
-
-  Copy `alertmanager/smtp_auth_password.example` to `alertmanager/smtp_auth_password` and set your password.
-
-- For Grafana:
-
-  Copy `environments/smpt.env.example` to `environments/smpt.env` and set the appropriate environment variables values.
+This requires the following environment variables to be set:
+- `GRAFANA_SERVER`
+- `GRAFANA_TOKEN`
+- `GRAFANA_ORG_ID` (on self-hosted OSS / Enterprise) / `GRAFANA_STACK_ID` (on Grafana Cloud) 
